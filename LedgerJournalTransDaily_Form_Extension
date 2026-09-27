@@ -1,0 +1,47 @@
+[ExtensionOf(formStr(LedgerJournalTransDaily))]
+final class LedgerJournalTransDaily_SCMiahona_Extension
+{
+    public void init()
+    {
+        next init();
+
+        LedgerJournalTable ledgerJournalTable = this.ledgerJournalTable();
+        FormDataSource workflowHeaderDS = this.dataSource(
+            formDataSourceStr(LedgerJournalTransDaily, LedgerJournalTableWF));
+        QueryBuildDataSource workflowHeaderQBDS = workflowHeaderDS.queryBuildDataSource();
+
+        SysQuery::findOrCreateRange(
+            workflowHeaderQBDS,
+            fieldNum(LedgerJournalTable, JournalNum)).value(
+                queryValue(ledgerJournalTable.JournalNum));
+
+        this.design().workflowEnabled(true);
+        this.design().workflowDatasource(
+            formDataSourceStr(LedgerJournalTransDaily, LedgerJournalTableWF));
+        this.design().workflowType(
+            workflowTypeStr(SC_JournalReverseWFType));
+    }
+
+    public void run()
+    {
+        next run();
+        this.updateWorkflowControls();
+
+        LedgerJournalTable workflowJournalTable =
+            this.dataSource(
+                formDataSourceStr(LedgerJournalTransDaily, LedgerJournalTableWF))
+                .cursor();
+        FormControl transactionReversalButton =
+            this.design().controlName(
+                formControlStr(LedgerJournalTransDaily, TransactionReversalDialog));
+
+        if (transactionReversalButton)
+        {
+            transactionReversalButton.enabled(
+                workflowJournalTable.RecId
+                && workflowJournalTable.SC_JournalReverseStatus
+                    == SC_JournalReverseWFStatus::Approved);
+        }
+    }
+
+}
