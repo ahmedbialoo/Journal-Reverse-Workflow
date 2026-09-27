@@ -1,0 +1,74 @@
+/// <summary>
+/// The SC_JournalReverseWFTypeSubmitManager menu item action event handler.
+/// </summary>
+public class SC_JournalReverseWFTypeSubmitManager 
+{
+    public static void main(Args args)
+	{
+        LedgerJournalTable          ledgerJournalTable;
+        WorkflowVersionTable        workflowVersionTable;
+        WorkflowComment             note;
+        WorkflowSubmitDialog        workflowSubmitDialog;
+        WorkflowCorrelationId       workflowCorrelationId;
+        WorkflowTypeName            workflowTypeName = workflowTypeStr(SC_JournalReverseWFType);
+        RefRecId                    journalRecId;
+
+        ledgerJournalTable = args.record();
+        journalRecId = ledgerJournalTable.RecId;
+
+        if (!journalRecId
+            || ledgerJournalTable.Posted != NoYes::Yes
+            || ledgerJournalTable.SC_JournalReverseStatus != SC_JournalReverseWFStatus::Draft)
+        {
+            warning("Only posted journals in Draft reversal status can be submitted.");
+            return;
+        }
+
+        workflowVersionTable = Workflow::findWorkflowConfigToActivateForType(
+            workflowTypeName,
+            journalRecId,
+            ledgerJournalTable.TableId);
+
+        if (!workflowVersionTable.RecId)
+        {
+            error("No active journal reversal workflow configuration was found.");
+            return;
+        }
+
+        workflowSubmitDialog = WorkflowSubmitDialog::construct(workflowVersionTable);
+        workflowSubmitDialog.run();
+
+        if (workflowSubmitDialog.parmIsClosedOK())
+        {
+            note = workflowSubmitDialog.parmWorkflowComment();
+
+            try
+            {
+                ttsbegin;
+
+                select forupdate firstonly ledgerJournalTable
+                    where ledgerJournalTable.RecId == journalRecId;
+
+                workflowCorrelationId = Workflow::activateFromWorkflowConfigurationId(
+                    workflowVersionTable.ConfigurationId,
+                    ledgerJournalTable.RecId,
+                    note,
+                    NoYes::No);
+
+                ledgerJournalTable.SC_JournalReverseStatus = SC_JournalReverseWFStatus::Submitted;
+                ledgerJournalTable.update();
+
+                ttscommit;
+
+                info("Submitted to workflow.");
+            }
+            catch (Exception::Error)
+            {
+                error("Error on workflow activation.");
+            }
+        }
+
+        args.caller().updateWorkFlowControls();
+	}
+
+}
