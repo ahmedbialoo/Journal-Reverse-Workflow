@@ -1,0 +1,19 @@
+[ExtensionOf(tableStr(LedgerJournalTable))]
+final class LedgerJournalTable_SCMiahona_Extension
+{
+    public static void updateWorkflowStatus(RefRecId _recId, SC_JournalReverseWFStatus _status)
+    {
+        LedgerJournalTable ledgerJournalTable;
+
+        select forupdate firstonly ledgerJournalTable
+        where ledgerJournalTable.RecId == _recId;
+        if(ledgerJournalTable)
+        {
+            ttsbegin;
+            ledgerJournalTable.SC_JournalReverseStatus = _status;
+            ledgerJournalTable.update();
+            ttscommit;
+        }
+    }
+
+}
