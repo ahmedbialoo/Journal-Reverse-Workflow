@@ -1,0 +1,29 @@
+/// <summary>
+/// The SC_JournalReverseWFTypeEventHandler workflow event handler.
+/// </summary>
+public class  SC_JournalReverseWFTypeEventHandler implements WorkflowCanceledEventHandler,  
+	WorkflowCompletedEventHandler,
+	WorkflowStartedEventHandler
+{
+    public void started(WorkflowEventArgs _workflowEventArgs)
+	{
+		// TODO:  Write code to execute once the workflow is started.
+        LedgerJournalTable::updateWorkflowStatus(_workflowEventArgs.parmWorkflowContext().parmRecId(),SC_JournalReverseWFStatus::InReview);
+
+	}
+
+    public void canceled(WorkflowEventArgs _workflowEventArgs)
+	{
+		// TODO:  Write code to execute once the workflow is canceled.
+        LedgerJournalTable::updateWorkflowStatus(_workflowEventArgs.parmWorkflowContext().parmRecId(),SC_JournalReverseWFStatus::Rejected);
+
+	}
+
+    public void completed(WorkflowEventArgs _workflowEventArgs)
+	{
+		// TODO:  Write code to execute once the workflow is completed.
+        LedgerJournalTable::updateWorkflowStatus(_workflowEventArgs.parmWorkflowContext().parmRecId(), SC_JournalReverseWFStatus::Approved);
+
+	}
+
+}
