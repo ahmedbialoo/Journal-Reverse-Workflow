@@ -1,0 +1,53 @@
+/// <summary>
+/// The SC_JournalReverseWFApprovalEventHandler workflow outcome event handler.
+/// </summary>
+public final class SC_JournalReverseWFApprovalEventHandler implements WorkflowElementCanceledEventHandler,
+	WorkflowElemChangeRequestedEventHandler,
+	WorkflowElementCompletedEventHandler,
+	WorkflowElementReturnedEventHandler,
+	WorkflowElementStartedEventHandler,
+	WorkflowElementDeniedEventHandler,
+	WorkflowWorkItemsCreatedEventHandler
+{
+    public void started(WorkflowElementEventArgs _workflowElementEventArgs)
+	{
+		// TODO:  Write code to execute once the workflow is started.
+	}
+
+    public void canceled(WorkflowElementEventArgs _workflowElementEventArgs)
+	{
+		// TODO:  Write code to execute once the workflow is canceled.
+        LedgerJournalTable::updateWorkflowStatus(_workflowElementEventArgs.parmWorkflowContext().parmRecId(), SC_JournalReverseWFStatus::Rejected);
+
+	}
+
+    public void completed(WorkflowElementEventArgs _workflowElementEventArgs)
+	{
+		// TODO:  Write code to execute once the workflow is completed.
+
+        LedgerJournalTable::updateWorkflowStatus(_workflowElementEventArgs.parmWorkflowContext().parmRecId(),SC_JournalReverseWFStatus::Approved);
+        //}
+       
+	}
+
+    public void denied(WorkflowElementEventArgs _workflowElementEventArgs)
+	{
+		// TODO:  Write code to execute once the workflow is denied.
+	}
+
+    public void changeRequested(WorkflowElementEventArgs _workflowElementEventArgs)
+	{
+		// TODO:  Write code to execute once change is requested for the workflow.
+	}
+
+    public void returned(WorkflowElementEventArgs _workflowElementEventArgs)
+	{
+		// TODO:  Write code to execute once the workflow is returned.
+	}
+
+    public void created(WorkflowWorkItemsEventArgs _workflowWorkItemsEventArgs)
+	{
+		// TODO:  Write code to execute once work items are created.
+	}
+
+}
